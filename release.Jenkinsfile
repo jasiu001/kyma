@@ -157,12 +157,15 @@ try {
                             dir(changelogGeneratorPath) {
                                 sh "docker build -t changelog-generator ."
                             }   
+
+                            // setup path to repository config file for `lerna-changelog`
+                            configFile = "./tools/changelog-generator/package.json"
                             
                             // Generate release changelog
-                            changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
+                            changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}", "CONFIG_FILE=${configFile}"])
 
                             // Generate CHANGELOG.md
-                            changelogGenerator('/app/generate-full-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
+                            changelogGenerator('/app/generate-full-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}", "CONFIG_FILE=${configFile}"])
                             sh "BRANCH=${params.RELEASE_BRANCH} LATEST_VERSION=${appVersion} SSH_FILE=${sshfile} APP_PATH=./tools/changelog-generator/app ./tools/changelog-generator/app/push-full-changelog.sh --configure-git"
                             commitID = sh (script: "git rev-parse HEAD", returnStdout: true).trim()
 
